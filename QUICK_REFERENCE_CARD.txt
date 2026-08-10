@@ -1,0 +1,141 @@
+╔═══════════════════════════════════════════════════════════════════════╗
+║                    SCHOOLPC QUICK REFERENCE CARD                      ║
+║                      University of Immaculate Conception              ║
+╚═══════════════════════════════════════════════════════════════════════╝
+
+┌───────────────────────────────────────────────────────────────────────┐
+│  🎓 STUDENT LOGIN (Your Friends)                                      │
+├───────────────────────────────────────────────────────────────────────┤
+│  All students use password: password                                  │
+│                                                                        │
+│  NIKKO ANGELO P. NAVARRO                                              │
+│  Username: 230000002875  |  Password: password                        │
+│                                                                        │
+│  JO-AN PAULA HONRADA                                                  │
+│  Username: 230000000813  |  Password: password                        │
+│                                                                        │
+│  KYZYLL GWEN O. MENDOZA                                               │
+│  Username: 230000001794  |  Password: password                        │
+│                                                                        │
+│  KYLE CLANCY F. TAN                                                   │
+│  Username: 220000002154  |  Password: password                        │
+│                                                                        │
+│  PRINCESS ELLEIN S. UGAY                                              │
+│  Username: 230000001482  |  Password: password                        │
+│                                                                        │
+│  KURT VINCENT S. LOPENA                                               │
+│  Username: 240000000531  |  Password: password                        │
+│                                                                        │
+│  KEN JONAS T. BALTAZAR                                                │
+│  Username: 230000000268  |  Password: password                        │
+│                                                                        │
+│  PAUL ADRIAN CLAVE L. PONCE                                           │
+│  Username: 230000001888  |  Password: password                        │
+└───────────────────────────────────────────────────────────────────────┘
+
+┌───────────────────────────────────────────────────────────────────────┐
+│  🔑 ADMIN ACCOUNTS                                                     │
+├───────────────────────────────────────────────────────────────────────┤
+│  Regular Admin (needs database):                                      │
+│    Username: admin                                                    │
+│    Password: admin123                                                 │
+└───────────────────────────────────────────────────────────────────────┘
+
+┌───────────────────────────────────────────────────────────────────────┐
+│  🚨 EMERGENCY ACCESS (Works WITHOUT Database!)                        │
+├───────────────────────────────────────────────────────────────────────┤
+│  Use this if MySQL is down or database fails:                         │
+│                                                                        │
+│  Emergency Bypass:                                                    │
+│    Username: bypass_admin                                             │
+│    Password: bypass#superadmin                                        │
+│                                                                        │
+│  This account is HARDCODED and works even when:                       │
+│    • XAMPP is stopped                                                 │
+│    • Database is corrupted                                            │
+│    • Network is down                                                  │
+│    • Database credentials are wrong                                   │
+└───────────────────────────────────────────────────────────────────────┘
+
+┌───────────────────────────────────────────────────────────────────────┐
+│  📋 QUICK SETUP CHECKLIST                                             │
+├───────────────────────────────────────────────────────────────────────┤
+│  [ ] XAMPP MySQL running (green in control panel)                     │
+│  [ ] Open phpMyAdmin: http://localhost/phpmyadmin                     │
+│  [ ] Run database_setup.sql (copy/paste to SQL tab)                   │
+│  [ ] Verify 8 students in database                                    │
+│  [ ] (Optional) Add background image to Images\uic_background.jpg     │
+│  [ ] Press F5 in Visual Studio to run                                 │
+│  [ ] Login with 230000002875 / password                               │
+│  [ ] Test emergency_admin (stop MySQL first)                          │
+└───────────────────────────────────────────────────────────────────────┘
+
+┌───────────────────────────────────────────────────────────────────────┐
+│  🛠️ TROUBLESHOOTING                                                   │
+├───────────────────────────────────────────────────────────────────────┤
+│  Database connection failed?                                          │
+│    ▸ Check XAMPP Control Panel - MySQL should be green               │
+│    ▸ Try: http://localhost/phpmyadmin                                 │
+│    ▸ Restart MySQL in XAMPP                                           │
+│    ▸ Use bypass_admin to bypass database                              │
+│                                                                        │
+│  Background image not showing?                                        │
+│    ▸ Check: SchoolPC.Client\Images\uic_background.jpg exists         │
+│    ▸ Right-click image > Properties                                   │
+│    ▸ Build Action: Content                                            │
+│    ▸ Copy to Output Directory: Copy if newer                          │
+│    ▸ Rebuild project (Ctrl+Shift+B)                                   │
+│                                                                        │
+│  Alt+Tab still works?                                                 │
+│    ▸ Normal! Run as Administrator for full lockdown                   │
+│    ▸ For testing, partial lockdown is OK                              │
+└───────────────────────────────────────────────────────────────────────┘
+
+┌───────────────────────────────────────────────────────────────────────┐
+│  🎯 TESTING GUIDE                                                      │
+├───────────────────────────────────────────────────────────────────────┤
+│  Test 1: Normal Login (Database Working)                              │
+│    1. Press F5 to run                                                 │
+│    2. Login: 230000002875 / password                                  │
+│    3. Should see: "Welcome, NIKKO ANGELO P. NAVARRO!"                 │
+│    4. Click "Report Problem" - test report submission                 │
+│    5. Click "Logout" - returns to login                               │
+│                                                                        │
+│  Test 2: Emergency Access (Database Down)                             │
+│    1. Stop MySQL in XAMPP Control Panel                               │
+│    2. Press F5 to run                                                 │
+│    3. Login: bypass_admin / bypass#superadmin                         │
+│    4. Should work without database! ✅                                │
+│                                                                        │
+│  Test 3: Lockdown Features                                            │
+│    1. Start app when logged out                                       │
+│    2. Try Alt+Tab → blocked ✅                                        │
+│    3. Try Win key → blocked ✅                                        │
+│    4. Try Ctrl+Shift+Esc → blocked ✅                                 │
+└───────────────────────────────────────────────────────────────────────┘
+
+┌───────────────────────────────────────────────────────────────────────┐
+│  📁 WHERE FILES ARE                                                    │
+├───────────────────────────────────────────────────────────────────────┤
+│  Database SQL:    database_setup.sql                                  │
+│  Credentials:     CREDENTIALS.md                                      │
+│  Setup Guide:     SETUP_COMPLETE_GUIDE.md                             │
+│  Quick Start:     QUICK_SETUP.md                                      │
+│  Full Docs:       README.md                                           │
+│  Images Folder:   SchoolPC.Client\Images\                             │
+└───────────────────────────────────────────────────────────────────────┘
+
+╔═══════════════════════════════════════════════════════════════════════╗
+║  💡 PRO TIPS                                                          ║
+╠═══════════════════════════════════════════════════════════════════════╣
+║  • Student login = Student ID number (e.g., 230000002875)            ║
+║  • All student passwords are just "password" for easy testing         ║
+║  • Emergency account works WITHOUT database - print and keep safe!    ║
+║  • Use Ctrl+F5 to run without debugging (faster)                      ║
+║  • Add your own background image for better branding                  ║
+║  • Emergency bypass shows error message with hint to use it           ║
+╚═══════════════════════════════════════════════════════════════════════╝
+
+═══════════════════════════════════════════════════════════════════════════
+						SAVE THIS FILE - PRINT IT - KEEP IT SAFE!
+═══════════════════════════════════════════════════════════════════════════
