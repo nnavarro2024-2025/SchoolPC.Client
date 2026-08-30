@@ -31,7 +31,7 @@ namespace SchoolPC.Client
             btnCancel.Enabled = false;
 
             string pcName = Environment.MachineName;
-            bool success = await _databaseService.SubmitProblemReportAsync(pcName, _studentId, _studentName, message);
+            bool success = await _databaseService.SubmitProblemReportAsync(Program.ClientGuid, pcName, _studentId, _studentName, message);
 
             if (success)
             {

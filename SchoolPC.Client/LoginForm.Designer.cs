@@ -96,8 +96,8 @@ namespace SchoolPC.Client
             txtPassword.Font = new Font("Segoe UI", 14F);
             txtPassword.Location = new Point(389, 345);
             txtPassword.Margin = new Padding(3, 2, 3, 2);
-            txtPassword.Multiline = true;
             txtPassword.Name = "txtPassword";
+            txtPassword.PasswordChar = '*';
             txtPassword.PlaceholderText = "Password";
             txtPassword.Size = new Size(575, 32);
             txtPassword.TabIndex = 1;
@@ -106,6 +106,7 @@ namespace SchoolPC.Client
             // 
             // btnLogin
             // 
+            btnLogin.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             btnLogin.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             btnLogin.BackColor = Color.FromArgb(0, 120, 215);
             btnLogin.Cursor = Cursors.Hand;
@@ -137,6 +138,7 @@ namespace SchoolPC.Client
             panelLogin.Controls.Add(lblPassword);
             panelLogin.Controls.Add(txtPassword);
             panelLogin.Controls.Add(btnLogin);
+            panelLogin.Dock = DockStyle.Fill;
             panelLogin.ForeColor = Color.Transparent;
             panelLogin.Location = new Point(0, 0);
             panelLogin.Margin = new Padding(0);

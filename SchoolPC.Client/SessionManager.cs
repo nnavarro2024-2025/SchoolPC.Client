@@ -27,7 +27,7 @@ namespace SchoolPC.Client
             }
 
             string pcName = Environment.MachineName;
-            _currentSessionId = await _databaseService.StartSessionAsync(pcName, studentId, studentName);
+            _currentSessionId = await _databaseService.StartSessionAsync(Program.ClientGuid, pcName, studentId, studentName);
 
             if (_currentSessionId > 0)
             {

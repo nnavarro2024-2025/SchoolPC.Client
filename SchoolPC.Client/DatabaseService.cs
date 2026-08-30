@@ -185,7 +185,7 @@ namespace SchoolPC.Client
             }
         }
 
-        public async Task<int> StartSessionAsync(string pcName, string studentId, string studentName)
+        public async Task<int> StartSessionAsync(string clientGuid, string pcName, string studentId, string studentName)
         {
             try
             {
@@ -193,10 +193,11 @@ namespace SchoolPC.Client
                 await connection.OpenAsync();
 
                 const string sql = @"
-                    INSERT INTO sessions (pc_name, student_id, student_name, login_time) 
-                    VALUES (@pcName, @studentId, @studentName, NOW())";
+                    INSERT INTO sessions (client_guid, pc_name, student_id, student_name, login_time) 
+                    VALUES (@clientGuid, @pcName, @studentId, @studentName, NOW())";
 
                 using var cmd = new MySqlCommand(sql, connection);
+                cmd.Parameters.AddWithValue("@clientGuid", clientGuid);
                 cmd.Parameters.AddWithValue("@pcName", pcName);
                 cmd.Parameters.AddWithValue("@studentId", studentId);
                 cmd.Parameters.AddWithValue("@studentName", studentName);
@@ -237,7 +238,7 @@ namespace SchoolPC.Client
             }
         }
 
-        public async Task<bool> SubmitProblemReportAsync(string pcName, string studentId, string studentName, string message)
+        public async Task<bool> SubmitProblemReportAsync(string clientGuid, string pcName, string studentId, string studentName, string message)
         {
             try
             {
@@ -245,10 +246,11 @@ namespace SchoolPC.Client
                 await connection.OpenAsync();
 
                 const string sql = @"
-                    INSERT INTO problem_reports (pc_name, student_id, student_name, message, status, created_at) 
-                    VALUES (@pcName, @studentId, @studentName, @message, 'open', NOW())";
+                    INSERT INTO problem_reports (client_guid, pc_name, student_id, student_name, message, status, created_at) 
+                    VALUES (@clientGuid, @pcName, @studentId, @studentName, @message, 'open', NOW())";
 
                 using var cmd = new MySqlCommand(sql, connection);
+                cmd.Parameters.AddWithValue("@clientGuid", clientGuid);
                 cmd.Parameters.AddWithValue("@pcName", pcName);
                 cmd.Parameters.AddWithValue("@studentId", studentId);
                 cmd.Parameters.AddWithValue("@studentName", studentName);

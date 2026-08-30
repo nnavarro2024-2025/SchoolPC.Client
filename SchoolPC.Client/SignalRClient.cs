@@ -106,7 +106,10 @@ namespace SchoolPC.Client
 
             try
             {
-                await _connection.InvokeAsync("RegisterClient", Environment.MachineName);
+                // RegisterClient now includes both machine name and persistent client GUID
+                // This allows the server to uniquely identify this PC even if the machine name changes
+                await _connection.InvokeAsync("RegisterClient", Program.ClientGuid, Environment.MachineName);
+                Console.WriteLine($"Client registered with ID: {Program.ClientGuid} (Machine: {Environment.MachineName})");
             }
             catch (Exception ex)
             {
@@ -121,7 +124,9 @@ namespace SchoolPC.Client
 
             try
             {
+                // UpdateClientStatus now includes persistent client GUID for server-side PC identification
                 await _connection.InvokeAsync("UpdateClientStatus",
+                    Program.ClientGuid,
                     Environment.MachineName,
                     studentId,
                     studentName,
@@ -140,7 +145,8 @@ namespace SchoolPC.Client
 
             try
             {
-                await _connection.InvokeAsync("Heartbeat", Environment.MachineName);
+                // Heartbeat now includes persistent client GUID for continuous server-side tracking
+                await _connection.InvokeAsync("Heartbeat", Program.ClientGuid, Environment.MachineName);
             }
             catch (Exception ex)
             {
