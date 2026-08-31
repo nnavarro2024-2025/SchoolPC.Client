@@ -1,3 +1,5 @@
+using SchoolPC.Client.Services;
+
 namespace SchoolPC.Client
 {
     public partial class MainForm : Form
@@ -36,6 +38,12 @@ namespace SchoolPC.Client
             timerSession.Start();
 
             ConnectToAdminServer();
+
+            // Notify server that session started
+            if (_signalRClient != null && _signalRClient.IsConnected)
+            {
+                await _signalRClient.NotifySessionStartedAsync(_studentId, _studentName);
+            }
         }
 
         private void SetupTrayIcon()
@@ -60,17 +68,6 @@ namespace SchoolPC.Client
             {
                 lblConnectionStatus.Text = "Server: Connected";
                 lblConnectionStatus.ForeColor = Color.Green;
-
-                await _signalRClient.SendStatusUpdateAsync(_studentId, _studentName, "logged_in");
-
-                _ = Task.Run(async () =>
-                {
-                    while (_signalRClient.IsConnected)
-                    {
-                        await _signalRClient.SendHeartbeatAsync();
-                        await Task.Delay(30000);
-                    }
-                });
             }
             else
             {
@@ -138,12 +135,11 @@ namespace SchoolPC.Client
 
             if (_signalRClient != null)
             {
-                await _signalRClient.SendStatusUpdateAsync(_studentId, _studentName, "logged_out");
+                await _signalRClient.NotifySessionEndedAsync(_studentId);
                 await _signalRClient.DisconnectAsync();
             }
 
             await _sessionManager.EndSessionAsync();
-
             this.Close();
         }
 
@@ -199,5 +195,7 @@ namespace SchoolPC.Client
             WindowState = FormWindowState.Normal;
             BtnLogout_Click(sender, e);
         }
+
+        public SignalRClient? SignalRClient => _signalRClient;
     }
 }

@@ -1,3 +1,5 @@
+using SchoolPC.Client.Services;
+
 namespace SchoolPC.Client
 {
     public partial class ReportDialog : Form
@@ -21,30 +23,32 @@ namespace SchoolPC.Client
         {
             string message = txtMessage.Text.Trim();
 
-            if (string.IsNullOrEmpty(message))
+            if (string.IsNullOrWhiteSpace(message))
             {
-                MessageBox.Show("Please enter a problem description.", "Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Please describe the problem.", "Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            btnSubmit.Enabled = false;
-            btnCancel.Enabled = false;
-
-            string pcName = Environment.MachineName;
-            bool success = await _databaseService.SubmitProblemReportAsync(Program.ClientGuid, pcName, _studentId, _studentName, message);
-
-            if (success)
+            try
             {
-                MessageBox.Show("Problem report submitted successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                _submitted = true;
+                // Send via SignalR to admin server
+                var mainForm = Owner as MainForm;
+                if (mainForm?.SignalRClient != null && mainForm.SignalRClient.IsConnected)
+                {
+                    await mainForm.SignalRClient.ReportProblemAsync(_studentId, _studentName, message);
+                    MessageBox.Show("Problem reported successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    MessageBox.Show("Not connected to admin server.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("Failed to submit report. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                btnSubmit.Enabled = true;
-                btnCancel.Enabled = true;
+                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

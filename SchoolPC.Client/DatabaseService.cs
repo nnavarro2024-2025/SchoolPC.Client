@@ -12,90 +12,28 @@ namespace SchoolPC.Client
             _connectionString = $"Server={server};Database={database};User ID={user};Password={password};Port=3306;";
         }
 
-        #region Database Schema SQL (For XAMPP MySQL Setup)
+        #region Database Schema SQL (Use Deploy/database_setup.sql instead)
         /*
-        -- Run this SQL in phpMyAdmin (XAMPP) to create the database:
+        IMPORTANT: This code class uses client_guid to track persistent PC identity.
 
-        CREATE DATABASE IF NOT EXISTS schoolpc_db;
-        USE schoolpc_db;
+        The database schema is defined in: SchoolPC.Client/Deploy/database_setup.sql
+        Run that file in phpMyAdmin to create the database with the correct schema:
 
-        -- Students table (will be replaced by UIC portal API later)
-        CREATE TABLE IF NOT EXISTS students (
-            student_id VARCHAR(50) PRIMARY KEY,
-            username VARCHAR(100) NOT NULL UNIQUE,
-            password_hash VARCHAR(255) NOT NULL,
-            full_name VARCHAR(200) NOT NULL,
-            email VARCHAR(150),
-            is_active BOOLEAN DEFAULT TRUE,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
+        Key tables:
+        - students: Student accounts (username = student ID, password_hash = BCrypt)
+        - sessions: Login/logout audit trail (uses client_guid as primary key)
+        - problem_reports: Issue tracking (uses client_guid as primary key)
+        - pc_instances: Persistent PC tracking (client_guid survives machine renames)
 
-        -- Admin accounts
-        CREATE TABLE IF NOT EXISTS admin_accounts (
-            admin_id INT AUTO_INCREMENT PRIMARY KEY,
-            username VARCHAR(100) NOT NULL UNIQUE,
-            password_hash VARCHAR(255) NOT NULL,
-            full_name VARCHAR(200) NOT NULL,
-            role VARCHAR(50) DEFAULT 'admin',
-            is_active BOOLEAN DEFAULT TRUE,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
+        CRITICAL: sessions and problem_reports tables MUST have 'client_guid VARCHAR(36)' column.
+        If your database doesn't have this column, run:
 
-        -- Test/Guest accounts
-        CREATE TABLE IF NOT EXISTS test_accounts (
-            test_id INT AUTO_INCREMENT PRIMARY KEY,
-            username VARCHAR(100) NOT NULL UNIQUE,
-            password_hash VARCHAR(255) NOT NULL,
-            full_name VARCHAR(200) NOT NULL,
-            notes TEXT,
-            is_active BOOLEAN DEFAULT TRUE,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
+        ALTER TABLE sessions ADD COLUMN client_guid VARCHAR(36) FIRST;
+        ALTER TABLE problem_reports ADD COLUMN client_guid VARCHAR(36) FIRST;
 
-        -- Banned students
-        CREATE TABLE IF NOT EXISTS banned_students (
-            ban_id INT AUTO_INCREMENT PRIMARY KEY,
-            student_id VARCHAR(50) NOT NULL,
-            reason TEXT,
-            banned_by VARCHAR(100),
-            banned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (student_id) REFERENCES students(student_id)
-        );
-
-        -- Session logs
-        CREATE TABLE IF NOT EXISTS sessions (
-            session_id INT AUTO_INCREMENT PRIMARY KEY,
-            pc_name VARCHAR(100) NOT NULL,
-            student_id VARCHAR(50) NOT NULL,
-            student_name VARCHAR(200) NOT NULL,
-            login_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            logout_time TIMESTAMP NULL,
-            duration_minutes INT,
-            FOREIGN KEY (student_id) REFERENCES students(student_id)
-        );
-
-        -- Problem reports
-        CREATE TABLE IF NOT EXISTS problem_reports (
-            report_id INT AUTO_INCREMENT PRIMARY KEY,
-            pc_name VARCHAR(100) NOT NULL,
-            student_id VARCHAR(50) NOT NULL,
-            student_name VARCHAR(200) NOT NULL,
-            message TEXT NOT NULL,
-            status VARCHAR(50) DEFAULT 'open',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            resolved_at TIMESTAMP NULL,
-            resolved_by VARCHAR(100)
-        );
-
-        -- Insert sample test data (optional)
-        INSERT INTO students (student_id, username, password_hash, full_name, email) 
-        VALUES 
-            ('2024-001', 'jdoe', SHA2('password123', 256), 'John Doe', 'jdoe@uic.edu.ph'),
-            ('2024-002', 'msmith', SHA2('password123', 256), 'Mary Smith', 'msmith@uic.edu.ph');
-
-        INSERT INTO admin_accounts (username, password_hash, full_name, role) 
-        VALUES 
-            ('admin', SHA2('admin123', 256), 'System Administrator', 'super_admin');
+        After adding client_guid, verify with:
+        DESCRIBE sessions;
+        DESCRIBE problem_reports;
         */
         #endregion
 
@@ -125,8 +63,6 @@ namespace SchoolPC.Client
 
             try
             {
-                string passwordHash = HashPassword(password);
-
                 using var connection = new MySqlConnection(_connectionString);
                 await connection.OpenAsync();
 
@@ -135,7 +71,7 @@ namespace SchoolPC.Client
                     SELECT COUNT(*) 
                     FROM banned_students bs 
                     INNER JOIN students s ON bs.student_id = s.student_id 
-                    WHERE s.username = @username";
+                    WHERE s.username = @username AND bs.is_active = TRUE";
 
                 using (var banCmd = new MySqlCommand(banCheckSql, connection))
                 {
@@ -147,25 +83,29 @@ namespace SchoolPC.Client
                     }
                 }
 
-                // Authenticate student
+                // Retrieve student record to verify password with BCrypt
                 const string authSql = @"
-                    SELECT student_id, full_name 
+                    SELECT student_id, full_name, password_hash 
                     FROM students 
                     WHERE username = @username 
-                    AND password_hash = @passwordHash 
                     AND is_active = TRUE";
 
                 using (var authCmd = new MySqlCommand(authSql, connection))
                 {
                     authCmd.Parameters.AddWithValue("@username", username);
-                    authCmd.Parameters.AddWithValue("@passwordHash", passwordHash);
 
                     using var reader = await authCmd.ExecuteReaderAsync();
                     if (await reader.ReadAsync())
                     {
                         string studentId = reader.GetString("student_id");
                         string fullName = reader.GetString("full_name");
-                        return (true, studentId, fullName);
+                        string passwordHash = reader.GetString("password_hash");
+
+                        // Verify password using BCrypt
+                        if (BCrypt.Net.BCrypt.Verify(password, passwordHash))
+                        {
+                            return (true, studentId, fullName);
+                        }
                     }
                 }
 
@@ -264,14 +204,6 @@ namespace SchoolPC.Client
                 MessageBox.Show($"Failed to submit report: {ex.Message}", "Database Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
-        }
-
-        private string HashPassword(string password)
-        {
-            using var sha256 = System.Security.Cryptography.SHA256.Create();
-            byte[] bytes = System.Text.Encoding.UTF8.GetBytes(password);
-            byte[] hash = sha256.ComputeHash(bytes);
-            return BitConverter.ToString(hash).Replace("-", "").ToLower();
         }
     }
 }
