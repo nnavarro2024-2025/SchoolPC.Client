@@ -145,6 +145,16 @@ namespace SchoolPC.Client
 
         private async void MainForm_FormClosing(object? sender, FormClosingEventArgs e)
         {
+            // Prevent closing when X button is clicked - minimize to system tray instead
+            if (e.CloseReason == CloseReason.UserClosing)
+            {
+                e.Cancel = true;
+                this.WindowState = FormWindowState.Minimized;
+                this.Hide();
+                return;
+            }
+
+            // Allow closing only if explicitly logging out
             if (_sessionManager.IsSessionActive)
             {
                 e.Cancel = true;

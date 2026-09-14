@@ -106,7 +106,6 @@ namespace SchoolPC.Client
             // 
             // btnLogin
             // 
-            btnLogin.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             btnLogin.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             btnLogin.BackColor = Color.FromArgb(0, 120, 215);
             btnLogin.Cursor = Cursors.Hand;
@@ -149,7 +148,6 @@ namespace SchoolPC.Client
             // 
             // lblStatus
             // 
-            lblStatus.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
             lblStatus.BackColor = Color.Transparent;
             lblStatus.Font = new Font("Segoe UI", 10F);
             lblStatus.ForeColor = Color.Yellow;

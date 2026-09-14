@@ -24,8 +24,8 @@ namespace SchoolPC.Client
             // Load background image if exists
             LoadBackgroundImage();
 
-            // Center the login panel - make it responsive to screen size
-            CenterLoginPanel();
+            // Center all controls within the panel
+            CenterAllControls();
 
             // Display PC name
             lblPCName.Text = $"PC: {Environment.MachineName}";
@@ -45,18 +45,62 @@ namespace SchoolPC.Client
                 }
             };
 
-            // Handle window resize to keep panel centered
-            this.Resize += (s, evt) => CenterLoginPanel();
+            // Handle window resize to keep controls centered
+            this.Resize += (s, evt) => CenterAllControls();
 
             // Test database connection
             TestDatabaseConnection();
         }
 
-        private void CenterLoginPanel()
+        private void CenterAllControls()
         {
-            // Center the login panel on any monitor size
-            panelLogin.Left = Math.Max(0, (this.ClientSize.Width - panelLogin.Width) / 2);
-            panelLogin.Top = Math.Max(0, (this.ClientSize.Height - panelLogin.Height) / 2);
+            // Calculate center position for the group of controls
+            int formCenterX = this.ClientSize.Width / 2;
+
+            // Define control widths (most inputs are 575 pixels wide)
+            int controlWidth = 575;
+            int leftMargin = formCenterX - (controlWidth / 2);
+
+            // Center X position for all controls
+            // Title spans full width and is centered with TextAlign
+            lblTitle.Left = 0;
+            lblTitle.Width = this.ClientSize.Width;
+            lblTitle.Height = 80;
+
+            // School name - center it properly
+            lblSchoolName.AutoSize = false;
+            lblSchoolName.Left = leftMargin;
+            lblSchoolName.Width = controlWidth;
+            lblSchoolName.Height = 40;
+
+            // All input controls aligned to center
+            lblPCName.Left = leftMargin;
+            lblUsername.Left = leftMargin;
+            txtUsername.Left = leftMargin;
+            txtUsername.Width = controlWidth;
+
+            lblPassword.Left = leftMargin;
+            txtPassword.Left = leftMargin;
+            txtPassword.Width = controlWidth;
+
+            lblStatus.Left = leftMargin;
+            lblStatus.Width = controlWidth;
+
+            btnLogin.Left = leftMargin;
+            btnLogin.Width = controlWidth;
+
+            // Center Y position - start from top with padding
+            int topPadding = Math.Max(40, (this.ClientSize.Height - 520) / 2);
+
+            lblTitle.Top = topPadding + 50;
+            lblSchoolName.Top = topPadding + 135;  // After lblTitle (50 + 80 = 130, added 5px gap)
+            lblPCName.Top = topPadding + 185;
+            lblUsername.Top = topPadding + 230;
+            txtUsername.Top = topPadding + 260;
+            lblPassword.Top = topPadding + 300;
+            txtPassword.Top = topPadding + 327;
+            lblStatus.Top = topPadding + 361;
+            btnLogin.Top = topPadding + 392;
         }
 
         private void LoadBackgroundImage()
