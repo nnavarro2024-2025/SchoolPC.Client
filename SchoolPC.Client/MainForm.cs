@@ -9,7 +9,6 @@ namespace SchoolPC.Client
         private readonly DatabaseService _databaseService;
         private readonly LockdownManager _lockdownManager;
         private readonly SessionManager _sessionManager;
-        private SignalRClient? _signalRClient;
 
         public MainForm(
             string studentId,
@@ -37,65 +36,15 @@ namespace SchoolPC.Client
             UpdateSessionInfo();
             timerSession.Start();
 
-            ConnectToAdminServer();
-
-            // Notify server that session started
-            if (_signalRClient != null && _signalRClient.IsConnected)
-            {
-                await _signalRClient.NotifySessionStartedAsync(_studentId, _studentName);
-            }
+            // Hook Windows shutdown events
+            Microsoft.Win32.SystemEvents.SessionEnding += OnWindowsSessionEnding;
         }
 
         private void SetupTrayIcon()
         {
-            // Use a default system icon or create custom icon
-            // For now, use Application icon (you can customize this later)
             notifyIcon.Icon = SystemIcons.Application;
             notifyIcon.Text = $"School PC - {_studentName}";
             notifyIcon.Visible = true;
-        }
-
-        private async void ConnectToAdminServer()
-        {
-            _signalRClient = new SignalRClient(
-                _lockdownManager,
-                OnAdminMessageReceived,
-                OnForceLogout
-            );
-
-            bool connected = await _signalRClient.ConnectAsync();
-            if (connected)
-            {
-                lblConnectionStatus.Text = "Server: Connected";
-                lblConnectionStatus.ForeColor = Color.Green;
-            }
-            else
-            {
-                lblConnectionStatus.Text = "Server: Connection failed";
-                lblConnectionStatus.ForeColor = Color.Red;
-            }
-        }
-
-        private void OnAdminMessageReceived(string message)
-        {
-            if (InvokeRequired)
-            {
-                Invoke(() => OnAdminMessageReceived(message));
-                return;
-            }
-
-            MessageBox.Show(message, "Message from Admin", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-
-        private void OnForceLogout()
-        {
-            if (InvokeRequired)
-            {
-                Invoke(OnForceLogout);
-                return;
-            }
-
-            PerformLogout();
         }
 
         private void TimerSession_Tick(object? sender, EventArgs e)
@@ -133,18 +82,16 @@ namespace SchoolPC.Client
         {
             timerSession.Stop();
 
-            if (_signalRClient != null)
-            {
-                await _signalRClient.NotifySessionEndedAsync(_studentId);
-                await _signalRClient.DisconnectAsync();
-            }
-
-            await _sessionManager.EndSessionAsync();
+            // End session with 'logout' reason
+            await _sessionManager.EndSessionAsync(endReason: "logout");
             this.Close();
         }
 
         private async void MainForm_FormClosing(object? sender, FormClosingEventArgs e)
         {
+            // Unhook event on close
+            Microsoft.Win32.SystemEvents.SessionEnding -= OnWindowsSessionEnding;
+
             // Prevent closing when X button is clicked - minimize to system tray instead
             if (e.CloseReason == CloseReason.UserClosing)
             {
@@ -162,10 +109,28 @@ namespace SchoolPC.Client
             }
         }
 
+        private void OnWindowsSessionEnding(object sender, Microsoft.Win32.SessionEndingEventArgs e)
+        {
+            Console.WriteLine("[MainForm] Windows session ending (shutdown/restart/sign-out)");
+            e.Cancel = false; // Don't block Windows shutdown
+
+            // End session synchronously with a 2-second timeout.
+            // async void handlers return at the first await, so Windows won't wait.
+            // We must run this synchronously to ensure the session is closed before Windows kills the process.
+            try
+            {
+                _sessionManager.EndSessionSync(endReason: "windows shutdown");
+                Console.WriteLine("[MainForm] Windows shutdown session closed");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[MainForm] Error during Windows shutdown: {ex.Message}");
+            }
+        }
+
         // Tray icon event handlers
         private void MainForm_Resize(object? sender, EventArgs e)
         {
-            // Minimize to tray when minimized
             if (WindowState == FormWindowState.Minimized)
             {
                 Hide();
@@ -175,7 +140,6 @@ namespace SchoolPC.Client
 
         private void NotifyIcon_DoubleClick(object? sender, EventArgs e)
         {
-            // Restore window on double-click
             Show();
             WindowState = FormWindowState.Normal;
             Activate();
@@ -183,7 +147,6 @@ namespace SchoolPC.Client
 
         private void MenuItemShow_Click(object? sender, EventArgs e)
         {
-            // Show window from tray menu
             Show();
             WindowState = FormWindowState.Normal;
             Activate();
@@ -191,7 +154,6 @@ namespace SchoolPC.Client
 
         private void MenuItemReportProblem_Click(object? sender, EventArgs e)
         {
-            // Report problem from tray menu
             Show();
             WindowState = FormWindowState.Normal;
             Activate();
@@ -200,12 +162,10 @@ namespace SchoolPC.Client
 
         private void MenuItemLogout_Click(object? sender, EventArgs e)
         {
-            // Logout from tray menu
             Show();
             WindowState = FormWindowState.Normal;
             BtnLogout_Click(sender, e);
         }
 
-        public SignalRClient? SignalRClient => _signalRClient;
-    }
-}
+            }
+        }

@@ -4,8 +4,10 @@ namespace SchoolPC.Client.Services
     /// Singleton service for managing the persistent client identity (GUID).
     /// On first run, generates a new GUID and stores it in C:\ProgramData\SchoolPC\client_id.txt.
     /// On subsequent runs, reads the existing GUID from the file.
-    /// This GUID survives Windows machine name changes and is used by SignalR 
-    /// to uniquely identify this physical PC installation.
+    /// This GUID survives Windows machine name changes and is used as the unique identifier for:
+    /// - Session registration and logbook entries
+    /// - Problem report tracking
+    /// - PC registration and heartbeat updates
     /// </summary>
     public static class ClientIdentityService
     {

@@ -21,7 +21,6 @@ namespace SchoolPC.Client
             btnReportProblem = new Button();
             btnLogout = new Button();
             timerSession = new System.Windows.Forms.Timer(components);
-            lblConnectionStatus = new Label();
             notifyIcon = new NotifyIcon(components);
             contextMenuTray = new ContextMenuStrip(components);
             menuItemShow = new ToolStripMenuItem();
@@ -84,17 +83,6 @@ namespace SchoolPC.Client
             timerSession.Interval = 1000;
             timerSession.Tick += TimerSession_Tick;
             // 
-            // lblConnectionStatus
-            // 
-            lblConnectionStatus.AutoSize = true;
-            lblConnectionStatus.Font = new Font("Segoe UI", 9F);
-            lblConnectionStatus.ForeColor = Color.Gray;
-            lblConnectionStatus.Location = new Point(10, 191);
-            lblConnectionStatus.Name = "lblConnectionStatus";
-            lblConnectionStatus.Size = new Size(124, 15);
-            lblConnectionStatus.TabIndex = 4;
-            lblConnectionStatus.Text = "Server: Not connected";
-            // 
             // notifyIcon
             // 
             notifyIcon.ContextMenuStrip = contextMenuTray;
@@ -106,27 +94,27 @@ namespace SchoolPC.Client
             // 
             contextMenuTray.Items.AddRange(new ToolStripItem[] { menuItemShow, menuItemReportProblem, menuItemLogout });
             contextMenuTray.Name = "contextMenuTray";
-            contextMenuTray.Size = new Size(181, 70);
+            contextMenuTray.Size = new Size(158, 70);
             // 
             // menuItemShow
             // 
             menuItemShow.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             menuItemShow.Name = "menuItemShow";
-            menuItemShow.Size = new Size(180, 22);
+            menuItemShow.Size = new Size(157, 22);
             menuItemShow.Text = "Show Window";
             menuItemShow.Click += MenuItemShow_Click;
             // 
             // menuItemReportProblem
             // 
             menuItemReportProblem.Name = "menuItemReportProblem";
-            menuItemReportProblem.Size = new Size(180, 22);
+            menuItemReportProblem.Size = new Size(157, 22);
             menuItemReportProblem.Text = "Report Problem";
             menuItemReportProblem.Click += MenuItemReportProblem_Click;
             // 
             // menuItemLogout
             // 
             menuItemLogout.Name = "menuItemLogout";
-            menuItemLogout.Size = new Size(180, 22);
+            menuItemLogout.Size = new Size(157, 22);
             menuItemLogout.Text = "Logout";
             menuItemLogout.Click += MenuItemLogout_Click;
             // 
@@ -134,8 +122,7 @@ namespace SchoolPC.Client
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(484, 253);
-            Controls.Add(lblConnectionStatus);
+            ClientSize = new Size(484, 229);
             Controls.Add(btnLogout);
             Controls.Add(btnReportProblem);
             Controls.Add(lblSessionInfo);
@@ -143,7 +130,6 @@ namespace SchoolPC.Client
             FormBorderStyle = FormBorderStyle.FixedSingle;
             Margin = new Padding(3, 2, 3, 2);
             MaximizeBox = false;
-            MinimizeBox = true;
             Name = "MainForm";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "School PC - Student Session";
@@ -160,7 +146,6 @@ namespace SchoolPC.Client
         private Button btnReportProblem;
         private Button btnLogout;
         private System.Windows.Forms.Timer timerSession;
-        private Label lblConnectionStatus;
         private NotifyIcon notifyIcon;
         private ContextMenuStrip contextMenuTray;
         private ToolStripMenuItem menuItemShow;

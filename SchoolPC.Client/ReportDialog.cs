@@ -7,7 +7,6 @@ namespace SchoolPC.Client
         private readonly DatabaseService _databaseService;
         private readonly string _studentId;
         private readonly string _studentName;
-        private bool _submitted = false;
 
         public ReportDialog(DatabaseService databaseService, string studentId, string studentName)
         {
@@ -31,25 +30,34 @@ namespace SchoolPC.Client
 
             try
             {
-                // Send via SignalR to admin server
-                var mainForm = Owner as MainForm;
-                if (mainForm?.SignalRClient != null && mainForm.SignalRClient.IsConnected)
+                // Submit problem report directly to database
+                string pcName = Environment.MachineName;
+                bool success = await _databaseService.SubmitProblemReportAsync(
+                    Program.ClientGuid, 
+                    pcName, 
+                    _studentId, 
+                    _studentName, 
+                    message
+                );
+
+                if (success)
                 {
-                    await mainForm.SignalRClient.ReportProblemAsync(_studentId, _studentName, message);
-                    MessageBox.Show("Problem reported successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Problem reported successfully. Thank you for reporting this issue.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    this.DialogResult = DialogResult.OK;
                 }
                 else
                 {
-                    MessageBox.Show("Not connected to admin server.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("Failed to submit problem report. Please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
                 }
-
-                this.DialogResult = DialogResult.OK;
-                this.Close();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error submitting report: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
             }
+
+            this.Close();
         }
 
         private void BtnCancel_Click(object? sender, EventArgs e)
