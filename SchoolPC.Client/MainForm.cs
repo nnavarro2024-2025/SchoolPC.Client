@@ -9,6 +9,7 @@ namespace SchoolPC.Client
         private readonly DatabaseService _databaseService;
         private readonly LockdownManager _lockdownManager;
         private readonly SessionManager _sessionManager;
+        private bool _isLoggingOut = false;
 
         public MainForm(
             string studentId,
@@ -84,6 +85,7 @@ namespace SchoolPC.Client
 
             // End session with 'logout' reason
             await _sessionManager.EndSessionAsync(endReason: "logout");
+            _isLoggingOut = true;
             this.Close();
         }
 
@@ -91,6 +93,12 @@ namespace SchoolPC.Client
         {
             // Unhook event on close
             Microsoft.Win32.SystemEvents.SessionEnding -= OnWindowsSessionEnding;
+
+            // Allow closing if we're intentionally logging out
+            if (_isLoggingOut)
+            {
+                return;
+            }
 
             // Prevent closing when X button is clicked - minimize to system tray instead
             if (e.CloseReason == CloseReason.UserClosing)
@@ -101,7 +109,7 @@ namespace SchoolPC.Client
                 return;
             }
 
-            // Allow closing only if explicitly logging out
+            // Allow closing only if explicitly logging out or system shutdown
             if (_sessionManager.IsSessionActive)
             {
                 e.Cancel = true;
